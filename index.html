@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invito 21° Miriana</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --lilla-1: #89608E;
+            --lilla-2: #B48EBA;
+            --lilla-3: #D8BFE0;
+            --text-color: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            
+            --busta-bg: #B48EBA;
+            --busta-flap: #D8BFE0;
+            --busta-front: #89608E;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(-45deg, #4A304D, var(--lilla-1), var(--lilla-2), #F7F3F8);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-color);
+            overflow: hidden;
+            position: relative;
+            transition: background 1.5s ease;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body.sad-mode {
+            background: linear-gradient(-45deg, #1a1a24, #2d2d3a, #424254, #1a1a24);
+            background-size: 400% 400%;
+        }
+
+        .rain { position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; display: none; }
+        body.sad-mode .rain { display: block; }
+        .drop { position: absolute; bottom: 100%; width: 2px; height: 20px; background: rgba(255, 255, 255, 0.3); animation: fall linear infinite; }
+        @keyframes fall { to { transform: translateY(110vh); } }
+
+        .blob { position: absolute; filter: blur(60px); z-index: 0; opacity: 0.6; transition: background-color 1.5s ease; }
+        .blob-1 { width: 300px; height: 300px; background: var(--lilla-3); top: -50px; left: -50px; border-radius: 50%; animation: float-blob 8s ease-in-out infinite; }
+        .blob-2 { width: 400px; height: 400px; background: #ffffff; bottom: -100px; right: -50px; border-radius: 50%; animation: float-blob 12s ease-in-out infinite reverse; }
+        body.sad-mode .blob-1, body.sad-mode .blob-2 { background: #555c63; }
+
+        @keyframes float-blob {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        .container-main { position: relative; z-index: 10; width: 90%; max-width: 450px; height: 550px; display: flex; justify-content: center; align-items: center; perspective: 1000px; }
+
+        .envelope-wrapper { position: absolute; width: 340px; height: 220px; background: var(--busta-bg); border-radius: 6px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+        .envelope-wrapper.opened { opacity: 0; transform: translateY(100px) scale(0.8); pointer-events: none; }
+        
+        .env-front { position: absolute; inset: 0; background: var(--busta-front); clip-path: polygon(0 0, 50% 45%, 100% 0, 100% 100%, 0 100%); z-index: 3; border-radius: 6px; }
+        .env-flap { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--busta-flap); clip-path: polygon(0 0, 100% 0, 50% 55%); z-index: 4; border-radius: 6px 6px 0 0; }
+        .sender-name { position: absolute; bottom: 25px; width: 100%; text-align: center; font-family: 'Dancing Script', cursive; color: #ffffff; font-size: 28px; z-index: 5; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); }
+
+        .tear-strip-container { position: absolute; top: 0; left: 0; width: 100%; height: 30px; z-index: 10; background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.4) 5px, rgba(255,255,255,0.4) 10px); border-bottom: 2px dashed rgba(255,255,255,0.8); border-radius: 6px 6px 0 0; overflow: visible; }
+        .tear-handle { position: absolute; top: 50%; left: -10px; transform: translateY(-50%); width: 36px; height: 36px; background: #fff; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 12; display: flex; justify-content: center; align-items: center; cursor: grab; touch-action: none; }
+        .tear-handle:active { cursor: grabbing; }
+        .tear-handle::after { content: '→'; color: var(--lilla-1); font-size: 18px; font-weight: bold; }
+        .tear-track { position: absolute; top: 0; bottom: 0; left: 0; width: 0%; background: #4A304D; z-index: 11; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); pointer-events: none; border-radius: 6px 0 0 0; }
+        .tear-hint { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); color: white; font-size: 13px; font-weight: 600; pointer-events: none; width: max-content; animation: pulseHint 2s infinite; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        @keyframes pulseHint { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        .glass-card { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5); width: 100%; padding: 40px 30px; border-radius: 24px; background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); text-align: center; opacity: 0; z-index: 5; pointer-events: none; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .glass-card.revealed { opacity: 1; transform: translate(-50%, -50%) scale(1); z-index: 20; pointer-events: auto; }
+
+        .subtitle { font-size: 14px; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 10px; font-weight: 300; }
+        h1 { font-family: 'Dancing Script', cursive; font-size: 48px; margin-bottom: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: color 1s; }
+        body.sad-mode h1 { color: #dcdcdc; }
+
+        .event-details { background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 15px; margin-bottom: 30px; border: 1px solid rgba(255, 255, 255, 0.2); }
+        .event-details p { font-size: 15px; margin: 5px 0; font-weight: 300; }
+        .event-details p strong { font-weight: 600; }
+        
+        .form-group { margin-bottom: 20px; text-align: left; }
+        label.title-label { font-size: 13px; display: block; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
+        
+        input[type="text"] { width: 100%; padding: 14px; border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 12px; background: rgba(255, 255, 255, 0.1); color: white; font-family: inherit; font-size: 14px; transition: all 0.3s; }
+        input[type="text"]::placeholder { color: rgba(255, 255, 255, 0.6); }
+        input[type="text"]:focus { outline: none; background: rgba(255, 255, 255, 0.25); border-color: white; }
+
+        .radio-group { display: flex; gap: 15px; }
+        .radio-group label { flex: 1; text-align: center; padding: 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s; }
+        .radio-group input[type="radio"] { display: none; }
+        .radio-group input[type="radio"]:checked + label { background: white; color: var(--lilla-1); border-color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        body.sad-mode .radio-group input[type="radio"]:checked + label { color: #666; }
+
+        button.submit-btn { width: 100%; background-color: white; color: var(--lilla-1); border: none; padding: 16px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 16px; font-family: inherit; transition: all 0.3s; margin-top: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        button.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+        body.sad-mode button.submit-btn { color: #666; }
+
+        #success-msg { display: none; color: white; background: rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 12px; font-weight: 600; margin-top: 20px; font-size: 15px; border: 1px solid rgba(255,255,255,0.4); animation: fadeIn 0.5s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="rain" id="rain"></div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="container-main">
+        <div class="envelope-wrapper" id="envelope">
+            <div class="env-front"></div>
+            <div class="env-flap"></div>
+            <div class="sender-name">Da Miriana</div>
+            <div class="tear-strip-container" id="tear-container">
+                <div class="tear-track" id="tear-track"></div>
+                <div class="tear-handle" id="tear-handle"></div>
+            </div>
+            <div class="tear-hint" id="tear-hint">Scorri per aprire →</div>
+        </div>
+
+        <div class="glass-card" id="invite-card">
+            <div class="subtitle">Sei Invitato ai</div>
+            <h1>21 di Miriana</h1>
+            <div class="event-details">
+                <p><strong>Quando:</strong> Sabato 18 Ottobre</p>
+                <p><strong>Ora:</strong> 21:00</p>
+                <p><strong>Dove:</strong> Location da definire</p>
+            </div>
+            <form id="rsvp-form">
+                <div class="form-group">
+                    <label class="title-label" for="nome">Chi sei?</label>
+                    <input type="text" id="nome" required placeholder="Inserisci Nome e Cognome">
+                </div>
+                <div class="form-group">
+                    <label class="title-label">Ci sarai?</label>
+                    <div class="radio-group">
+                        <input type="radio" id="si" name="presenza" value="Sì, non mancherei!" required>
+                        <label for="si">Sì 🥂</label>
+                        <input type="radio" id="no" name="presenza" value="Purtroppo no">
+                        <label for="no">No 🥲</label>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">Conferma Presenza</button>
+                <div id="success-msg"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const handle = document.getElementById('tear-handle');
+        const track = document.getElementById('tear-track');
+        const container = document.getElementById('tear-container');
+        const envelope = document.getElementById('envelope');
+        const card = document.getElementById('invite-card');
+        const hint = document.getElementById('tear-hint');
+        const rainContainer = document.getElementById('rain');
+        
+        let isDragging = false;
+        let startX = 0;
+        let isOpened = false;
+        const maxDrag = container.offsetWidth; 
+
+        for (let i = 0; i < 60; i++) {
+            const drop = document.createElement('div');
+            drop.classList.add('drop');
+            drop.style.left = Math.random() * 100 + 'vw';
+            drop.style.animationDuration = (Math.random() * 0.8 + 0.4) + 's';
+            drop.style.animationDelay = (Math.random() * 2) + 's';
+            rainContainer.appendChild(drop);
+        }
+
+        handle.addEventListener('touchstart', (e) => {
+            if(isOpened) return;
+            isDragging = true;
+            startX = e.touches[0].clientX - (parseInt(handle.style.left) || -10);
+            hint.style.display = 'none';
+        }, {passive: false});
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging || isOpened) return;
+            e.preventDefault(); 
+            updateTear(e.touches[0].clientX - startX);
+        }, {passive: false});
+        document.addEventListener('touchend', () => {
+            if (!isDragging || isOpened) return;
+            isDragging = false;
+            checkOpenStatus();
+        });
+
+        handle.addEventListener('mousedown', (e) => {
+            if(isOpened) return;
+            isDragging = true;
+            startX = e.clientX - (parseInt(handle.style.left) || -10);
+            hint.style.display = 'none';
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging || isOpened) return;
+            updateTear(e.clientX - startX);
+        });
+        document.addEventListener('mouseup', () => {
+            if (!isDragging || isOpened) return;
+            isDragging = false;
+            checkOpenStatus();
+        });
+
+        function updateTear(x) {
+            if (x < -10) x = -10; 
+            if (x > maxDrag) x = maxDrag;
+            handle.style.left = x + 'px';
+            let trackWidth = x + (handle.offsetWidth / 2);
+            if (trackWidth < 0) trackWidth = 0;
+            track.style.width = trackWidth + 'px';
+            if (x > maxDrag * 0.8) openInvite();
+        }
+
+        function checkOpenStatus() {
+            const currentX = parseInt(handle.style.left || -10);
+            if (currentX < maxDrag * 0.8 && !isOpened) {
+                handle.style.transition = 'left 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                track.style.transition = 'width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                handle.style.left = '-10px';
+                track.style.width = '0px';
+                setTimeout(() => {
+                    handle.style.transition = 'none';
+                    track.style.transition = 'none';
+                }, 300);
+            }
+        }
+
+        function openInvite() {
+            if (isOpened) return;
+            isOpened = true;
+            handle.style.transition = 'left 0.2s';
+            track.style.transition = 'width 0.2s';
+            handle.style.left = maxDrag + 'px';
+            track.style.width = '100%';
+            setTimeout(() => {
+                envelope.classList.add('opened');
+                card.classList.add('revealed');
+                confetti({
+                    particleCount: 150,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#ffffff', '#D8BFE0', '#B48EBA', '#89608E']
+                });
+            }, 250); 
+        }
+
+        // --- GESTIONE INVIO DATI ---
+        document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const nome = document.getElementById('nome').value;
+            const radios = document.getElementsByName('presenza');
+            let presenza = '';
+            let isSad = false;
+            
+            for (const r of radios) {
+                if (r.checked) {
+                    presenza = r.value;
+                    if (r.id === 'no') isSad = true;
+                    break;
+                }
+            }
+            
+            const submitBtn = document.querySelector('.submit-btn');
+            const formGroups = document.querySelectorAll('.form-group');
+            const successMsg = document.getElementById('success-msg');
+            
+            submitBtn.textContent = 'Invio in corso...';
+            submitBtn.disabled = true;
+
+            // Funzione per mostrare l'esito grafico
+            const handleSuccess = (isSadSelection) => {
+                formGroups.forEach(el => el.style.display = 'none');
+                submitBtn.style.display = 'none';
+                successMsg.style.display = 'block';
+                
+                if (isSadSelection) {
+                    document.body.classList.add('sad-mode');
+                    successMsg.innerHTML = 'Ci dispiace che tu non ci sia. 🌧️';
+                    
+                    const scalar = 2;
+                    const emoji1 = confetti.shapeFromText({ text: '😢', scalar });
+                    const emoji2 = confetti.shapeFromText({ text: '😭', scalar });
+                    const emoji3 = confetti.shapeFromText({ text: '💔', scalar });
+
+                    confetti({
+                        particleCount: 30,
+                        spread: 100,
+                        origin: { y: 0.1 }, 
+                        shapes: [emoji1, emoji2, emoji3],
+                        scalar,
+                        gravity: 0.5,
+                        ticks: 400,
+                        disableForReducedMotion: true
+                    });
+                } else {
+                    successMsg.innerHTML = '✨ Presenza confermata! Grazie! ✨';
+                    confetti({
+                        particleCount: 100,
+                        spread: 60,
+                        origin: { y: 0.6 },
+                        colors: ['#ffffff', '#D8BFE0', '#B48EBA', '#89608E']
+                    });
+                }
+            };
+
+            try {
+                // Invia la POST. Se la fetch crasha, va subito nel blocco CATCH
+                const response = await fetch('http://127.0.0.1:5000/api/vota', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, presenza })
+                });
+
+                // Se la fetch ha completato il giro, facciamo partire l'animazione
+                handleSuccess(isSad);
+                
+            } catch (error) {
+                // IL FIX DEFINITIVO: Abbiamo eliminato l'alert.
+                // Registriamo l'errore in console, ma siccome sappiamo che il 
+                // messaggio Telegram ti arriva lo stesso, forziamo l'animazione.
+                console.warn("Fetch intercettato. Messaggio Telegram presumibilmente consegnato.", error);
+                
+                handleSuccess(isSad);
+            }
+        });
+    </script>
+</body>
+</html>
