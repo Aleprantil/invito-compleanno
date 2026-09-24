@@ -116,18 +116,20 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* --- FOTO FLUTTUANTE --- */
+/* --- FOTO FLUTTUANTE --- */
         .floating-photo {
             position: absolute;
-            top: 0; left: 0; /* Punto di partenza per il transform */
-            width: 120px;
-            height: 120px;
-            border-radius: 50%; /* Foto tonda */
-            object-fit: cover;
-            border: 4px solid white;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            top: 0; left: 0; 
+            width: 200px; /* Notevolmente più grande (era 120) */
+            height: 200px; /* Notevolmente più grande (era 120) */
+            border-radius: 50%; /* Se preferisci un quadrato arrotondato invece di un cerchio, cambia 50% con 15px */
+            object-fit: cover; /* Mantiene le proporzioni riempiendo lo spazio */
+            object-position: center 20%; /* Sposta l'inquadratura un po' più in alto (utile se il viso è tagliato sopra) */
+            border: 5px solid white;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
             z-index: 15;
-            display: none; /* Nascosta all'inizio */
-            pointer-events: none; /* Cliccandoci attraverso non blocchi l'interfaccia */
+            display: none;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -270,8 +272,8 @@
             posX += velX;
             posY += velY;
             
-            const maxX = window.innerWidth - 120; // 120px è la larghezza/altezza della foto
-            const maxY = window.innerHeight - 120;
+            const maxX = window.innerWidth - 200; // 120px è la larghezza/altezza della foto
+            const maxY = window.innerHeight - 200;
             
             if (posX <= 0 || posX >= maxX) velX *= -1;
             if (posY <= 0 || posY >= maxY) velY *= -1;
@@ -304,8 +306,8 @@
                 
                 // AVVIA LA FOTO FLUTTUANTE
                 photo.style.display = 'block';
-                posX = Math.random() * (window.innerWidth - 120);
-                posY = Math.random() * (window.innerHeight - 120);
+                posX = Math.random() * (window.innerWidth - 200);
+                posY = Math.random() * (window.innerHeight - 200);
                 velX = (Math.random() * 2 + 1.5) * (Math.random() > 0.5 ? 1 : -1);
                 velY = (Math.random() * 2 + 1.5) * (Math.random() > 0.5 ? 1 : -1);
                 
