@@ -114,12 +114,30 @@
 
         #success-msg { display: none; color: white; background: rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 12px; font-weight: 600; margin-top: 20px; font-size: 15px; border: 1px solid rgba(255,255,255,0.4); animation: fadeIn 0.5s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- FOTO FLUTTUANTE --- */
+        .floating-photo {
+            position: absolute;
+            top: 0; left: 0; /* Punto di partenza per il transform */
+            width: 120px;
+            height: 120px;
+            border-radius: 50%; /* Foto tonda */
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            z-index: 15;
+            display: none; /* Nascosta all'inizio */
+            pointer-events: none; /* Cliccandoci attraverso non blocchi l'interfaccia */
+        }
     </style>
 </head>
 <body>
     <div class="rain" id="rain"></div>
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
+
+    <!-- INSERISCI IL NOME DELLA TUA FOTO QUI (al posto di foto.jpg) -->
+    <img src="compleano.jpeg" alt="Foto divertente" class="floating-photo" id="floating-photo" onerror="this.src='https://via.placeholder.com/120/B48EBA/FFFFFF?text=FOTO'">
 
     <div class="container-main">
         <div class="envelope-wrapper" id="envelope">
@@ -241,6 +259,31 @@
             }
         }
 
+        // --- GESTIONE FOTO FLUTTUANTE ---
+        const photo = document.getElementById('floating-photo');
+        let posX, posY, velX, velY;
+        let isPhotoAnimating = false;
+
+        function animatePhoto() {
+            if (!isPhotoAnimating) return;
+            
+            posX += velX;
+            posY += velY;
+            
+            const maxX = window.innerWidth - 120; // 120px è la larghezza/altezza della foto
+            const maxY = window.innerHeight - 120;
+            
+            if (posX <= 0 || posX >= maxX) velX *= -1;
+            if (posY <= 0 || posY >= maxY) velY *= -1;
+            
+            posX = Math.max(0, Math.min(posX, maxX));
+            posY = Math.max(0, Math.min(posY, maxY));
+
+            photo.style.transform = `translate(${posX}px, ${posY}px)`;
+            
+            requestAnimationFrame(animatePhoto);
+        }
+
         function openInvite() {
             if (isOpened) return;
             isOpened = true;
@@ -248,6 +291,7 @@
             track.style.transition = 'width 0.2s';
             handle.style.left = maxDrag + 'px';
             track.style.width = '100%';
+            
             setTimeout(() => {
                 envelope.classList.add('opened');
                 card.classList.add('revealed');
@@ -257,6 +301,17 @@
                     origin: { y: 0.6 },
                     colors: ['#ffffff', '#D8BFE0', '#B48EBA', '#89608E']
                 });
+                
+                // AVVIA LA FOTO FLUTTUANTE
+                photo.style.display = 'block';
+                posX = Math.random() * (window.innerWidth - 120);
+                posY = Math.random() * (window.innerHeight - 120);
+                velX = (Math.random() * 2 + 1.5) * (Math.random() > 0.5 ? 1 : -1);
+                velY = (Math.random() * 2 + 1.5) * (Math.random() > 0.5 ? 1 : -1);
+                
+                isPhotoAnimating = true;
+                animatePhoto();
+
             }, 250); 
         }
 
@@ -284,11 +339,16 @@
             submitBtn.textContent = 'Invio in corso...';
             submitBtn.disabled = true;
 
-            // Funzione per mostrare l'esito grafico
             const handleSuccess = (isSadSelection) => {
                 formGroups.forEach(el => el.style.display = 'none');
                 submitBtn.style.display = 'none';
                 successMsg.style.display = 'block';
+                
+                // Ferma la foto quando l'utente vota
+                isPhotoAnimating = false;
+                photo.style.transition = 'opacity 0.5s';
+                photo.style.opacity = '0';
+                setTimeout(() => photo.style.display = 'none', 500);
                 
                 if (isSadSelection) {
                     document.body.classList.add('sad-mode');
@@ -321,22 +381,21 @@
             };
 
             try {
-                // Invia la POST. Se la fetch crasha, va subito nel blocco CATCH
                 const response = await fetch('http://127.0.0.1:5000/api/vota', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nome, presenza })
                 });
 
-                // Se la fetch ha completato il giro, facciamo partire l'animazione
-                handleSuccess(isSad);
-                
+                if(response.ok) {
+                    handleSuccess(isSad);
+                } else {
+                    alert('Errore di comunicazione col server (Risposta non OK).');
+                    submitBtn.textContent = 'Riprova';
+                    submitBtn.disabled = false;
+                }
             } catch (error) {
-                // IL FIX DEFINITIVO: Abbiamo eliminato l'alert.
-                // Registriamo l'errore in console, ma siccome sappiamo che il 
-                // messaggio Telegram ti arriva lo stesso, forziamo l'animazione.
                 console.warn("Fetch intercettato. Messaggio Telegram presumibilmente consegnato.", error);
-                
                 handleSuccess(isSad);
             }
         });
