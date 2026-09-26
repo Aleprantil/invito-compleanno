@@ -45,6 +45,7 @@
             100% { background-position: 0% 50%; }
         }
 
+        /* --- MODALITÀ TRISTE --- */
         body.sad-mode {
             background: linear-gradient(-45deg, #1a1a24, #2d2d3a, #424254, #1a1a24);
             background-size: 400% 400%;
@@ -67,6 +68,7 @@
             100% { transform: translate(0, 0) scale(1); }
         }
 
+        /* --- WRAPPER PRINCIPALE --- */
         .container-main { position: relative; z-index: 10; width: 90%; max-width: 450px; height: 550px; display: flex; justify-content: center; align-items: center; perspective: 1000px; }
 
         .envelope-wrapper { position: absolute; width: 340px; height: 220px; background: var(--busta-bg); border-radius: 6px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
@@ -84,6 +86,7 @@
         .tear-hint { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); color: white; font-size: 13px; font-weight: 600; pointer-events: none; width: max-content; animation: pulseHint 2s infinite; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         @keyframes pulseHint { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
+        /* --- LA CARD GLASSMORPHISM --- */
         .glass-card { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5); width: 100%; padding: 40px 30px; border-radius: 24px; background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); text-align: center; opacity: 0; z-index: 5; pointer-events: none; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
         .glass-card.revealed { opacity: 1; transform: translate(-50%, -50%) scale(1); z-index: 20; pointer-events: auto; }
 
@@ -115,21 +118,18 @@
         #success-msg { display: none; color: white; background: rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 12px; font-weight: 600; margin-top: 20px; font-size: 15px; border: 1px solid rgba(255,255,255,0.4); animation: fadeIn 0.5s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- FOTO FLUTTUANTE --- */
-/* --- FOTO FLUTTUANTE --- */
-        .floating-photo {
-            position: absolute;
-            top: 0; left: 0; 
-            width: 200px; /* Notevolmente più grande (era 120) */
-            height: 200px; /* Notevolmente più grande (era 120) */
-            border-radius: 50%; /* Se preferisci un quadrato arrotondato invece di un cerchio, cambia 50% con 15px */
-            object-fit: cover; /* Mantiene le proporzioni riempiendo lo spazio */
-            object-position: center 20%; /* Sposta l'inquadratura un po' più in alto (utile se il viso è tagliato sopra) */
-            border: 5px solid white;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            z-index: 15;
-            display: none;
-            pointer-events: none;
+        /* --- STILE PER LE FOTO CHE CADONO COME PIOGGIA --- */
+        .falling-photo {
+            position: fixed;
+            top: -200px;
+            width: 120px; /* Grandezza delle foto che cadono */
+            height: 120px;
+            border-radius: 50%; /* Tonno perfetto */
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 100;
+            pointer-events: none; /* Per non cliccarle per sbaglio */
         }
     </style>
 </head>
@@ -137,9 +137,6 @@
     <div class="rain" id="rain"></div>
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
-
-    <!-- INSERISCI IL NOME DELLA TUA FOTO QUI (al posto di foto.jpg) -->
-    <img src="compleano.jpeg" alt="Foto divertente" class="floating-photo" id="floating-photo" onerror="this.src='https://via.placeholder.com/120/B48EBA/FFFFFF?text=FOTO'">
 
     <div class="container-main">
         <div class="envelope-wrapper" id="envelope">
@@ -157,9 +154,9 @@
             <div class="subtitle">Sei Invitato ai</div>
             <h1>21 di Miriana</h1>
             <div class="event-details">
-                <p><strong>Quando:</strong> Sabato 18 Ottobre</p>
-                <p><strong>Ora:</strong> 21:00</p>
-                <p><strong>Dove:</strong> Location da definire</p>
+                <p><strong>Quando:</strong> Sabato 10 Ottobre</p>
+                <p><strong>Ora:</strong> 19:30</p>
+                <p><strong>Dove:</strong> Casa mia <3</p>
             </div>
             <form id="rsvp-form">
                 <div class="form-group">
@@ -195,6 +192,7 @@
         let isOpened = false;
         const maxDrag = container.offsetWidth; 
 
+        // Genera la pioggia finta per la "Sad Mode"
         for (let i = 0; i < 60; i++) {
             const drop = document.createElement('div');
             drop.classList.add('drop');
@@ -261,31 +259,6 @@
             }
         }
 
-        // --- GESTIONE FOTO FLUTTUANTE ---
-        const photo = document.getElementById('floating-photo');
-        let posX, posY, velX, velY;
-        let isPhotoAnimating = false;
-
-        function animatePhoto() {
-            if (!isPhotoAnimating) return;
-            
-            posX += velX;
-            posY += velY;
-            
-            const maxX = window.innerWidth - 200; // 120px è la larghezza/altezza della foto
-            const maxY = window.innerHeight - 200;
-            
-            if (posX <= 0 || posX >= maxX) velX *= -1;
-            if (posY <= 0 || posY >= maxY) velY *= -1;
-            
-            posX = Math.max(0, Math.min(posX, maxX));
-            posY = Math.max(0, Math.min(posY, maxY));
-
-            photo.style.transform = `translate(${posX}px, ${posY}px)`;
-            
-            requestAnimationFrame(animatePhoto);
-        }
-
         function openInvite() {
             if (isOpened) return;
             isOpened = true;
@@ -303,18 +276,51 @@
                     origin: { y: 0.6 },
                     colors: ['#ffffff', '#D8BFE0', '#B48EBA', '#89608E']
                 });
-                
-                // AVVIA LA FOTO FLUTTUANTE
-                photo.style.display = 'block';
-                posX = Math.random() * (window.innerWidth - 200);
-                posY = Math.random() * (window.innerHeight - 200);
-                velX = (Math.random() * 2 + 1.5) * (Math.random() > 0.5 ? 1 : -1);
-                velY = (Math.random() * 2 + 1.5) * (Math.random() > 0.5 ? 1 : -1);
-                
-                isPhotoAnimating = true;
-                animatePhoto();
-
             }, 250); 
+        }
+
+        // --- FUNZIONE PER LA PIOGGIA DI FOTO ---
+        function createPhotoRain() {
+            const NUM_PHOTOS = 18; // Numero di foto che pioveranno
+            
+            // --- INSERISCI QUI IL NOME DELLA TUA IMMAGINE ---
+            const IMMAGINE_MIRY = 'compleano.jpeg'; 
+            
+            for (let i = 0; i < NUM_PHOTOS; i++) {
+                const photo = document.createElement('img');
+                photo.src = IMMAGINE_MIRY;
+                
+                // Fallback nel caso l'immagine non esista
+                photo.onerror = function() { this.src = 'https://via.placeholder.com/120/B48EBA/FFFFFF?text=FOTO'; };
+                
+                photo.classList.add('falling-photo');
+                
+                // Posizione orizzontale casuale (da 0 a 100% della larghezza)
+                photo.style.left = (Math.random() * 90) + 'vw';
+                
+                document.body.appendChild(photo);
+                
+                // Usiamo le Web Animations API per creare una caduta personalizzata fluida
+                const fallDuration = (Math.random() * 2000) + 3000; // Tra 3 e 5 secondi
+                const fallDelay = Math.random() * 1500; // Ritardo casuale per non farle cadere tutte insieme
+                const rotationStart = Math.random() * 360;
+                const rotationEnd = rotationStart + (Math.random() > 0.5 ? 360 : -360); // Ruota in un senso o nell'altro
+                
+                const animation = photo.animate([
+                    { transform: `translateY(-20vh) rotate(${rotationStart}deg)` },
+                    { transform: `translateY(120vh) rotate(${rotationEnd}deg)` }
+                ], {
+                    duration: fallDuration,
+                    delay: fallDelay,
+                    easing: 'linear',
+                    fill: 'forwards'
+                });
+                
+                // Pulisce il DOM eliminando l'immagine quando l'animazione finisce
+                animation.onfinish = () => {
+                    photo.remove();
+                };
+            }
         }
 
         // --- GESTIONE INVIO DATI ---
@@ -346,15 +352,10 @@
                 submitBtn.style.display = 'none';
                 successMsg.style.display = 'block';
                 
-                // Ferma la foto quando l'utente vota
-                isPhotoAnimating = false;
-                photo.style.transition = 'opacity 0.5s';
-                photo.style.opacity = '0';
-                setTimeout(() => photo.style.display = 'none', 500);
-                
                 if (isSadSelection) {
+                    // EFFETTO TRISTE
                     document.body.classList.add('sad-mode');
-                    successMsg.innerHTML = 'Ci dispiace che tu non ci sia. 🌧️';
+                    successMsg.innerHTML = 'Non sai cosa ti perdi. 🌧️';
                     
                     const scalar = 2;
                     const emoji1 = confetti.shapeFromText({ text: '😢', scalar });
@@ -372,18 +373,24 @@
                         disableForReducedMotion: true
                     });
                 } else {
+                    // EFFETTO FESTOSO: CORIANDOLI + PIOGGIA DI FOTO!
                     successMsg.innerHTML = '✨ Presenza confermata! Grazie! ✨';
+                    
+                    // Lancia un po' di coriandoli dietro per fare atmosfera
                     confetti({
-                        particleCount: 100,
-                        spread: 60,
+                        particleCount: 80,
+                        spread: 70,
                         origin: { y: 0.6 },
                         colors: ['#ffffff', '#D8BFE0', '#B48EBA', '#89608E']
                     });
+                    
+                    // Fa piovere le foto di Miriana
+                    createPhotoRain();
                 }
             };
 
             try {
-                const response = await fetch('http://127.0.0.1:5000/api/vota', {
+                const response = await fetch('https://ambassador-newsletters-wines-bacon.trycloudflare.com/api/vota', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nome, presenza })
