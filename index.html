@@ -71,7 +71,7 @@
         /* --- WRAPPER PRINCIPALE --- */
         .container-main { position: relative; z-index: 10; width: 90%; max-width: 450px; height: 550px; display: flex; justify-content: center; align-items: center; perspective: 1000px; }
 
-        .envelope-wrapper { position: absolute; width: 340px; height: 220px; background: var(--busta-bg); border-radius: 6px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+        .envelope-wrapper { position: absolute; width: 340px; height: 220px; background: var(--busta-bg); border-radius: 6px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; margin: 0 auto; left: 0; right: 0; }
         .envelope-wrapper.opened { opacity: 0; transform: translateY(100px) scale(0.8); pointer-events: none; }
         
         .env-front { position: absolute; inset: 0; background: var(--busta-front); clip-path: polygon(0 0, 50% 45%, 100% 0, 100% 100%, 0 100%); z-index: 3; border-radius: 6px; }
@@ -122,14 +122,14 @@
         .falling-photo {
             position: fixed;
             top: -200px;
-            width: 120px; /* Grandezza delle foto che cadono */
+            width: 120px;
             height: 120px;
-            border-radius: 50%; /* Tonno perfetto */
+            border-radius: 50%;
             object-fit: cover;
             border: 4px solid white;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             z-index: 100;
-            pointer-events: none; /* Per non cliccarle per sbaglio */
+            pointer-events: none;
         }
     </style>
 </head>
@@ -192,7 +192,6 @@
         let isOpened = false;
         const maxDrag = container.offsetWidth; 
 
-        // Genera la pioggia finta per la "Sad Mode"
         for (let i = 0; i < 60; i++) {
             const drop = document.createElement('div');
             drop.classList.add('drop');
@@ -279,32 +278,22 @@
             }, 250); 
         }
 
-        // --- FUNZIONE PER LA PIOGGIA DI FOTO ---
         function createPhotoRain() {
-            const NUM_PHOTOS = 18; // Numero di foto che pioveranno
-            
-            // --- INSERISCI QUI IL NOME DELLA TUA IMMAGINE ---
+            const NUM_PHOTOS = 18; 
             const IMMAGINE_MIRY = 'compleano.jpeg'; 
             
             for (let i = 0; i < NUM_PHOTOS; i++) {
                 const photo = document.createElement('img');
                 photo.src = IMMAGINE_MIRY;
-                
-                // Fallback nel caso l'immagine non esista
                 photo.onerror = function() { this.src = 'https://via.placeholder.com/120/B48EBA/FFFFFF?text=FOTO'; };
-                
                 photo.classList.add('falling-photo');
-                
-                // Posizione orizzontale casuale (da 0 a 100% della larghezza)
                 photo.style.left = (Math.random() * 90) + 'vw';
-                
                 document.body.appendChild(photo);
                 
-                // Usiamo le Web Animations API per creare una caduta personalizzata fluida
-                const fallDuration = (Math.random() * 2000) + 3000; // Tra 3 e 5 secondi
-                const fallDelay = Math.random() * 1500; // Ritardo casuale per non farle cadere tutte insieme
+                const fallDuration = (Math.random() * 2000) + 3000;
+                const fallDelay = Math.random() * 1500;
                 const rotationStart = Math.random() * 360;
-                const rotationEnd = rotationStart + (Math.random() > 0.5 ? 360 : -360); // Ruota in un senso o nell'altro
+                const rotationEnd = rotationStart + (Math.random() > 0.5 ? 360 : -360);
                 
                 const animation = photo.animate([
                     { transform: `translateY(-20vh) rotate(${rotationStart}deg)` },
@@ -316,14 +305,10 @@
                     fill: 'forwards'
                 });
                 
-                // Pulisce il DOM eliminando l'immagine quando l'animazione finisce
-                animation.onfinish = () => {
-                    photo.remove();
-                };
+                animation.onfinish = () => { photo.remove(); };
             }
         }
 
-        // --- GESTIONE INVIO DATI ---
         document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -353,7 +338,6 @@
                 successMsg.style.display = 'block';
                 
                 if (isSadSelection) {
-                    // EFFETTO TRISTE
                     document.body.classList.add('sad-mode');
                     successMsg.innerHTML = 'Non sai cosa ti perdi. 🌧️';
                     
@@ -373,10 +357,8 @@
                         disableForReducedMotion: true
                     });
                 } else {
-                    // EFFETTO FESTOSO: CORIANDOLI + PIOGGIA DI FOTO!
                     successMsg.innerHTML = '✨ Presenza confermata! Grazie! ✨';
                     
-                    // Lancia un po' di coriandoli dietro per fare atmosfera
                     confetti({
                         particleCount: 80,
                         spread: 70,
@@ -384,7 +366,6 @@
                         colors: ['#ffffff', '#D8BFE0', '#B48EBA', '#89608E']
                     });
                     
-                    // Fa piovere le foto di Miriana
                     createPhotoRain();
                 }
             };
